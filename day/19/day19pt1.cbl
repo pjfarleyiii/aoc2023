@@ -329,12 +329,6 @@ DEBUG>D                ", LINE='" LINEINPUT ( 1 : LINELEN) "'"
       D            RTNG-S (RTNGNDX)
                MOVE "IN" TO WKFL-NEXTRULE
                PERFORM UNTIL WKFL-NEXTRULE = "A   " OR "R   "
-      *            PERFORM VARYING WKFLNDX FROM 1 BY 1
-      *                UNTIL WKFLNDX > WKFLMAX OR
-      *                      WKFL-NEXTRULE =
-      *                      FUNCTION UPPER-CASE (WKFL-NAME (WKFLNDX))
-      *                SET WKFLSUB TO WKFLNDX
-      *            END-PERFORM
                    SET WKFLNDX TO 1
                    SEARCH WORKFLOW-TABLE
                        AT END

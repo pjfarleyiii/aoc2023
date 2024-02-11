@@ -320,120 +320,116 @@ DEBUG>D                ", LINE='" LINEINPUT ( 1 : LINELEN) "'"
                SET NOT-WORKFLOW-DONE TO TRUE
                MOVE CQUE-NAME TO WKFL-NEXTRULE
                PERFORM 110-SRCH-WKFL
-      *        PERFORM VARYING WKFLNDX FROM 1 BY 1
-      *            UNTIL WKFLNDX >= WKFLMAX OR WORKFLOW-DONE
-      *            SET WKFLSUB TO WKFLNDX
-                   PERFORM VARYING WKCRNDX FROM 1 BY 1
-                       UNTIL WKCRNDX >= WKFL-COUNT (WKFLNDX)
-                       MOVE WKFL-CRIT-TABLE (WKFLNDX WKCRNDX)
-                         TO CURR-FLOW-DATA
-                       MOVE CURRQUE-TABLE (CFLO-CNDX)
-                         TO INTERVALS-DATA
-      D                MOVE "CHECKG" TO CQUE-DMSG
-      D                PERFORM 240-SHOW-CQUE
-      D                DISPLAY "NTVL-LO=" NTVL-LO ",NTVL-HI=" NTVL-HI
-      *                ALL PASSTHROUGH, NO TRANSFER
-                       IF (CFLO-COND = ">" AND CFLO-VALUE >= NTVL-HI)
-                       OR (CFLO-COND = "<" AND CFLO-VALUE <= NTVL-LO)
-      D                    MOVE +2 TO S48
-      D                    PERFORM 230-SHOW-CFLO
-                           EXIT PERFORM CYCLE
-                       END-IF
-      *                ALL TRANSFER, NO PASSTHROUGH
-                       IF (CFLO-COND = ">" AND CFLO-VALUE < NTVL-LO)
-                       OR (CFLO-COND = "<" AND CFLO-VALUE > NTVL-HI)
-      D                    MOVE +3 TO S48
-      D                    PERFORM 230-SHOW-CFLO
-                           MOVE CFLO-RULE TO CQUE-NAME
-      D                    MOVE "ADDING" TO CQUE-DMSG
-      D                    PERFORM 240-SHOW-CQUE
-                           ADD +1 TO RQUEMAX
-                           IF RQUEMAX > +64
-                               DISPLAY "QUEUE DEPTH EXCEEDED #1"
-      D                            ",NAME=" CQUE-NAME
-      D                            ",(" CQUE-LO (1)
-      D                            ","  CQUE-HI (1) ")"
-      D                            ",(" CQUE-LO (2)
-      D                            ","  CQUE-HI (2) ")"
-      D                            ",(" CQUE-LO (3)
-      D                            ","  CQUE-HI (3) ")"
-      D                            ",(" CQUE-LO (4)
-      D                            ","  CQUE-HI (4) ")"
-                               CALL CEE3ABD USING ABEND-CODE,
-                                                  ABEND-FORMAT
-                           END-IF
-                           SET RQUENDX TO RQUEMAX
-                           MOVE CURR-QUEUE-DATA
-                             TO RNGQUE-TABLE (RQUENDX)
-      D                    PERFORM 210-SHOW-RNGQ
-                           SET WORKFLOW-DONE TO TRUE
-                           EXIT PERFORM
-                       END-IF
-      *                SOME TRANSFER, SOME PASSTHROUGH
-                       MOVE CURR-QUEUE-DATA TO CUR2-QUEUE-DATA
-      D                MOVE "BEFOR2" TO CQUE-DMSG
-      D                PERFORM 250-SHOW-CQU2
-                       IF CFLO-COND = ">"
-                           COMPUTE CQU2-LO (CFLO-CNDX) = CFLO-VALUE + 1
-                           COMPUTE CQUE-HI (CFLO-CNDX) = CFLO-VALUE
-                       ELSE
-                           COMPUTE CQU2-HI (CFLO-CNDX) = CFLO-VALUE - 1
-                           COMPUTE CQUE-LO (CFLO-CNDX) = CFLO-VALUE
-                       END-IF
-                       MOVE CFLO-RULE TO CQU2-NAME
-      D                MOVE +4 TO S48
+               PERFORM VARYING WKCRNDX FROM 1 BY 1
+                   UNTIL WKCRNDX >= WKFL-COUNT (WKFLNDX)
+                   MOVE WKFL-CRIT-TABLE (WKFLNDX WKCRNDX)
+                     TO CURR-FLOW-DATA
+                   MOVE CURRQUE-TABLE (CFLO-CNDX)
+                     TO INTERVALS-DATA
+      D            MOVE "CHECKG" TO CQUE-DMSG
+      D            PERFORM 240-SHOW-CQUE
+      D            DISPLAY "NTVL-LO=" NTVL-LO ",NTVL-HI=" NTVL-HI
+      *            ALL PASSTHROUGH, NO TRANSFER
+                   IF (CFLO-COND = ">" AND CFLO-VALUE >= NTVL-HI)
+                   OR (CFLO-COND = "<" AND CFLO-VALUE <= NTVL-LO)
+      D                MOVE +2 TO S48
       D                PERFORM 230-SHOW-CFLO
-      D                MOVE "MODIFY" TO CQUE-DMSG
-      D                PERFORM 240-SHOW-CQUE
-      D                MOVE +5 TO S48
-      D                MOVE "ADDING" TO CQUE-DMSG
-      D                PERFORM 250-SHOW-CQU2
-                       ADD +1 TO RQUEMAX
-                       IF RQUEMAX > +64
-                           DISPLAY "QUEUE DEPTH EXCEEDED #2"
-      D                        ",NAME=" CQUE-NAME
-      D                        ",(" CQUE-LO (1)
-      D                        ","  CQUE-HI (1) ")"
-      D                        ",(" CQUE-LO (2)
-      D                        ","  CQUE-HI (2) ")"
-      D                        ",(" CQUE-LO (3)
-      D                        ","  CQUE-HI (3) ")"
-      D                        ",(" CQUE-LO (4)
-      D                        ","  CQUE-HI (4) ")"
-                           CALL CEE3ABD USING ABEND-CODE,
-                                              ABEND-FORMAT
-                       END-IF
-                       SET RQUENDX TO RQUEMAX
-                       MOVE CUR2-QUEUE-DATA TO RNGQUE-TABLE (RQUENDX)
-      D                PERFORM 210-SHOW-RNGQ
-                   END-PERFORM
-                   IF NOT-WORKFLOW-DONE
-                       SET WKCRNDX TO WKFL-COUNT (WKFLNDX)
-                       MOVE WKFL-RULE (WKFLNDX WKCRNDX) TO CQUE-NAME
-      D                MOVE +6 TO S48
-      D                PERFORM 230-SHOW-CFLO
-      D                MOVE "ADDING" TO CQUE-DMSG
-      D                PERFORM 240-SHOW-CQUE
-                       ADD +1 TO RQUEMAX
-                       IF RQUEMAX > +64
-                           DISPLAY "QUEUE DEPTH EXCEEDED #2"
-      D                        ",NAME=" CQUE-NAME
-      D                        ",(" CQUE-LO (1)
-      D                        ","  CQUE-HI (1) ")"
-      D                        ",(" CQUE-LO (2)
-      D                        ","  CQUE-HI (2) ")"
-      D                        ",(" CQUE-LO (3)
-      D                        ","  CQUE-HI (3) ")"
-      D                        ",(" CQUE-LO (4)
-      D                        ","  CQUE-HI (4) ")"
-                           CALL CEE3ABD USING ABEND-CODE,
-                                              ABEND-FORMAT
-                       END-IF
-                       SET RQUENDX TO RQUEMAX
-                       MOVE CURR-QUEUE-DATA TO RNGQUE-TABLE (RQUENDX)
-      D                PERFORM 210-SHOW-RNGQ
+                       EXIT PERFORM CYCLE
                    END-IF
-      *        END-PERFORM
+      *            ALL TRANSFER, NO PASSTHROUGH
+                   IF (CFLO-COND = ">" AND CFLO-VALUE < NTVL-LO)
+                   OR (CFLO-COND = "<" AND CFLO-VALUE > NTVL-HI)
+      D                MOVE +3 TO S48
+      D                PERFORM 230-SHOW-CFLO
+                       MOVE CFLO-RULE TO CQUE-NAME
+      D                MOVE "ADDING" TO CQUE-DMSG
+      D                PERFORM 240-SHOW-CQUE
+                       ADD +1 TO RQUEMAX
+                       IF RQUEMAX > +64
+                           DISPLAY "QUEUE DEPTH EXCEEDED #1"
+      D                        ",NAME=" CQUE-NAME
+      D                        ",(" CQUE-LO (1)
+      D                        ","  CQUE-HI (1) ")"
+      D                        ",(" CQUE-LO (2)
+      D                        ","  CQUE-HI (2) ")"
+      D                        ",(" CQUE-LO (3)
+      D                        ","  CQUE-HI (3) ")"
+      D                        ",(" CQUE-LO (4)
+      D                        ","  CQUE-HI (4) ")"
+                           CALL CEE3ABD USING ABEND-CODE,
+                                              ABEND-FORMAT
+                       END-IF
+                       SET RQUENDX TO RQUEMAX
+                       MOVE CURR-QUEUE-DATA
+                         TO RNGQUE-TABLE (RQUENDX)
+      D                PERFORM 210-SHOW-RNGQ
+                       SET WORKFLOW-DONE TO TRUE
+                       EXIT PERFORM
+                   END-IF
+      *            SOME TRANSFER, SOME PASSTHROUGH
+                   MOVE CURR-QUEUE-DATA TO CUR2-QUEUE-DATA
+      D            MOVE "BEFOR2" TO CQUE-DMSG
+      D            PERFORM 250-SHOW-CQU2
+                   IF CFLO-COND = ">"
+                       COMPUTE CQU2-LO (CFLO-CNDX) = CFLO-VALUE + 1
+                       COMPUTE CQUE-HI (CFLO-CNDX) = CFLO-VALUE
+                   ELSE
+                       COMPUTE CQU2-HI (CFLO-CNDX) = CFLO-VALUE - 1
+                       COMPUTE CQUE-LO (CFLO-CNDX) = CFLO-VALUE
+                   END-IF
+                   MOVE CFLO-RULE TO CQU2-NAME
+      D            MOVE +4 TO S48
+      D            PERFORM 230-SHOW-CFLO
+      D            MOVE "MODIFY" TO CQUE-DMSG
+      D            PERFORM 240-SHOW-CQUE
+      D            MOVE +5 TO S48
+      D            MOVE "ADDING" TO CQUE-DMSG
+      D            PERFORM 250-SHOW-CQU2
+                   ADD +1 TO RQUEMAX
+                   IF RQUEMAX > +64
+                       DISPLAY "QUEUE DEPTH EXCEEDED #2"
+      D                    ",NAME=" CQUE-NAME
+      D                    ",(" CQUE-LO (1)
+      D                    ","  CQUE-HI (1) ")"
+      D                    ",(" CQUE-LO (2)
+      D                    ","  CQUE-HI (2) ")"
+      D                    ",(" CQUE-LO (3)
+      D                    ","  CQUE-HI (3) ")"
+      D                    ",(" CQUE-LO (4)
+      D                    ","  CQUE-HI (4) ")"
+                       CALL CEE3ABD USING ABEND-CODE,
+                                          ABEND-FORMAT
+                   END-IF
+                   SET RQUENDX TO RQUEMAX
+                   MOVE CUR2-QUEUE-DATA TO RNGQUE-TABLE (RQUENDX)
+      D            PERFORM 210-SHOW-RNGQ
+               END-PERFORM
+               IF NOT-WORKFLOW-DONE
+                   SET WKCRNDX TO WKFL-COUNT (WKFLNDX)
+                   MOVE WKFL-RULE (WKFLNDX WKCRNDX) TO CQUE-NAME
+      D            MOVE +6 TO S48
+      D            PERFORM 230-SHOW-CFLO
+      D            MOVE "ADDING" TO CQUE-DMSG
+      D            PERFORM 240-SHOW-CQUE
+                   ADD +1 TO RQUEMAX
+                   IF RQUEMAX > +64
+                       DISPLAY "QUEUE DEPTH EXCEEDED #2"
+      D                    ",NAME=" CQUE-NAME
+      D                    ",(" CQUE-LO (1)
+      D                    ","  CQUE-HI (1) ")"
+      D                    ",(" CQUE-LO (2)
+      D                    ","  CQUE-HI (2) ")"
+      D                    ",(" CQUE-LO (3)
+      D                    ","  CQUE-HI (3) ")"
+      D                    ",(" CQUE-LO (4)
+      D                    ","  CQUE-HI (4) ")"
+                       CALL CEE3ABD USING ABEND-CODE,
+                                          ABEND-FORMAT
+                   END-IF
+                   SET RQUENDX TO RQUEMAX
+                   MOVE CURR-QUEUE-DATA TO RNGQUE-TABLE (RQUENDX)
+      D            PERFORM 210-SHOW-RNGQ
+               END-IF
            END-PERFORM
            .
 
